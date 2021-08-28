@@ -1,0 +1,25 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var s2 = ee.ImageCollection("COPERNICUS/S2"),
+    Rtk = ee.FeatureCollection("users/lakshmanaearth/Rohtak_district"),
+    si1_18_Param = {"opacity":1,"bands":["si1_18"],"min":1381.1723642530958,"max":2857.9465599931164,"palette":["10e2cf","4158ff","1086ff","0423ff","08106c"]};
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+// Import 2018 Pre-Monsoon_Sentinel 2 Images
+var sen18 = s2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10))
+  .filter(ee.Filter.date('2018-01-01', '2018-05-31'))
+
+var image18 = sen18.median(); 
+// Calculate-SI - 1
+//'sqrt(GREEN**2 + RED**2)
+var si1_18 = image18.expression(
+    'sqrt(GREEN**2 + RED**2)', 
+    {
+      'GREEN': image18.select('B3'),
+      'RED': image18.select('B4'),
+}).rename('si1_18');
+
+var rgbVis = {min: 0.0, max: 3000, bands: ['B4', 'B3', 'B2']};
+var ndviVis = {min:0, max:1, palette: ['white', 'green']}
+var ndwiVis = {min:0, max:0.5, palette: ['white', 'blue']}
+
+Map.addLayer(image18.clip(Rtk), rgbVis, 'true18');
+Map.addLayer(si1_18.clip(Rtk), si1_18_Param, 'si1_18')

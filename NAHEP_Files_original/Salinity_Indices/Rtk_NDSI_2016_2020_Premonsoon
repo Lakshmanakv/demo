@@ -1,0 +1,69 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var s2 = ee.ImageCollection("COPERNICUS/S2"),
+    Rtk = ee.FeatureCollection("users/lakshmanaearth/Rohtak_district"),
+    ndsi16Param = {"opacity":1,"bands":["ndsi16"],"min":-0.506145251396648,"max":0.0018158236057068742,"palette":["efff02","ff8e02","ff2c0a","ca441c","9b170a"]},
+    ndsi17Param = {"opacity":1,"bands":["ndsi18"],"min":-0.5562234752589182,"max":-0.0015555811277330259,"palette":["efff02","ff8e02","ff2c0a","ca441c","9b170a"]},
+    ndsi18Param = {"opacity":1,"bands":["ndsi18"],"min":-0.5467789448162317,"max":-0.046216610303820745,"palette":["efff02","ff8e02","ff2c0a","ca441c","9b170a"]},
+    ndsi19Param = {"opacity":1,"bands":["ndsi19"],"min":-0.5238669780983926,"max":-0.04873638387147563,"palette":["efff02","ff8e02","ff2c0a","ca441c","9b170a"]},
+    ndsi20Param = {"opacity":1,"bands":["ndsi20"],"min":-0.5184985117228812,"max":-0.00712828205655224,"palette":["efff02","ff8e02","ff2c0a","ca441c","9b170a"]};
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+
+// Import 2016 Pre-Monsoon_Sentinel 2 Images
+var sen16 = s2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10))
+  .filter(ee.Filter.date('2016-01-01', '2016-05-31'))
+// Import 2017 Pre-Monsoon_Sentinel 2 Images
+var sen17 = s2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10))
+  .filter(ee.Filter.date('2017-01-01', '2017-05-31'))
+// Import 2018 Pre-Monsoon_Sentinel 2 Images
+var sen18 = s2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10))
+  .filter(ee.Filter.date('2018-01-01', '2018-05-31'))
+// Import 2019 Pre-Monsoon_Sentinel 2 Images  
+var sen19 = s2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10))
+  .filter(ee.Filter.date('2019-01-01', '2019-05-31')) 
+// Import 2020 Pre-Monsoon_Sentinel 2 Images  
+var sen20 = s2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10))
+  .filter(ee.Filter.date('2020-01-01', '2020-05-31'))
+// True colour images-2016 to 2020 Pre monsoon
+var image16 = sen16.median(); 
+var image17 = sen17.median(); 
+var image18 = sen18.median(); 
+var image19 = sen19.median(); 
+var image20 = sen20.median(); 
+// Calculate-NDSI 2016 to 2020 Pre monsoon
+// (RED - NIR) / (RED + NIR)
+var ndsi16 = image16.expression(
+    '(RED - NIR) / (RED + NIR)', {
+      'NIR': image16.select('B8'),
+      'RED': image16.select('B4'),
+}).rename('ndsi16');
+var ndsi17 = image17.expression(
+    '(RED - NIR) / (RED + NIR)', {
+      'NIR': image17.select('B8'),
+      'RED': image17.select('B4'),
+}).rename('ndsi18');
+var ndsi18 = image18.expression(
+    '(RED - NIR) / (RED + NIR)', {
+      'NIR': image18.select('B8'),
+      'RED': image18.select('B4'),
+}).rename('ndsi18');
+var ndsi19 = image19.expression(
+    '(RED - NIR) / (RED + NIR)', {
+      'NIR': image19.select('B8'),
+      'RED': image19.select('B4'),
+}).rename('ndsi19');
+var ndsi20 = image20.expression(
+    '(RED - NIR) / (RED + NIR)', {
+      'NIR': image20.select('B8'),
+      'RED': image20.select('B4'),
+}).rename('ndsi20');
+// Visualization parameter
+var rgbVis = {min: 0.0, max: 3000, bands: ['B4', 'B3', 'B2']};
+var ndviVis = {min:0, max:1, palette: ["efff02","ff8e02","ff2c0a","ca441c","9b170a"]}
+var ndwiVis = {min:0, max:0.5, palette: ['white', 'blue']}
+
+// Visualization-NDSI 2015 to 2020 Pre monsoon
+Map.addLayer(ndsi16.clip(Rtk), ndsi16Param, 'ndsi16')
+Map.addLayer(ndsi17.clip(Rtk), ndsi17Param, 'ndsi17')
+Map.addLayer(ndsi18.clip(Rtk), ndsi18Param, 'ndsi18')
+Map.addLayer(ndsi19.clip(Rtk), ndsi19Param, 'ndsi19')
+Map.addLayer(ndsi20.clip(Rtk), ndsi20Param, 'ndsi20')

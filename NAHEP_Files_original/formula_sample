@@ -1,0 +1,32 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var s2 = ee.ImageCollection("COPERNICUS/S2");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+// compute composite for all images aquired in the last 3 days
+var now = ee.Date(Date.now())
+var composite = s2
+  .filterDate(now.advance(-3, 'day'), now)
+  .mosaic()
+  .divide(10000)
+
+Map.addLayer(composite, {bands: ['B8', 'B8', 'B4'], min: 0, max: 0.4}, 'composite')
+
+// compute MSAVI2 using expression
+var msavi2 = composite.expression(
+  '(2 * NIR + 1 - sqrt(pow((2 * NIR + 1), 2) - 8 * (NIR - RED)) ) / 2', 
+  {
+    'NIR': composite.select('B8'), 
+    'RED': composite.select('B4')
+  }
+);
+
+Map.addLayer(msavi2, {min: -0.1, max: 0.5}, 'msavi2 (expression)')
+
+// compute MSAVI2 using fluent API
+msavi2 = composite.select('B8').multiply(2).add(1)
+  .subtract(composite.select('B8').multiply(2).add(1).pow(2)
+    .subtract(composite.select('B8').subtract(composite.select('B4')).multiply(8)).sqrt()
+  ).divide(2)
+
+Map.addLayer(msavi2, {min: -0.1, max: 0.5}, 'msavi2 (fluent)')
+//
+
